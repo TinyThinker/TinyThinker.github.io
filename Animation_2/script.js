@@ -1,9 +1,10 @@
 const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
-const particlesArray = [];
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+
+particlesArray = [];
 
 window.addEventListener('resize', function(){
   canvas.width = window.innerWidth;
@@ -19,6 +20,8 @@ const mouse = {
 canvas.addEventListener('click', function(ev){
   mouse.x = ev.x;
   mouse.y = ev.y;
+
+  init();
 })
 
 canvas.addEventListener('mousemove', function(ev){
@@ -28,15 +31,14 @@ canvas.addEventListener('mousemove', function(ev){
 
 class Particle{
   constructor(){
-    // this.x = mouse.x;
-    // this.y = mouse.y;
-    this.x = Math.random() * canvas.width;
-    this.y = Math.random() * canvas.height;
-    this.size = Math.random() * 4 + 1;
-    this.speedX = Math.random() * 1 - 0.5;
-    this.speedY = Math.random() * 1 - 0.5;
-    this.accelX = Math.random() * .2 - .2;
-    this.accelY = Math.random() * .2 - .2;
+    this.direction = 1;
+    this.updates = 0;
+    this.reverse = Math.random() * 60 + 30;
+    this.x = mouse.x + Math.random() * 50;
+    this.y = mouse.y + Math.random() * 50;;
+    this.size = Math.random() * 7;
+    this.speedX = Math.random() * 10 - 5;
+    this.speedY = Math.random() * 10 - 5;
 
     this.opacity = Math.random();
 
@@ -44,34 +46,16 @@ class Particle{
     this.green = Math.random() * 255;
     this.blue = Math.random() * 255;
     this.rgb = this.red + ', ' + this.green + ', ' + this.blue + ', ';
-    this.color = 'rgba(' + this.rgb + this.opacity + ')';
-    this.garbage = false;
-
-    // console.log(this);
+    this.color = 'rgba(' + this.rgb + this.opacity + ')'
   }
   update(){
-    this.x += this.speedX;
-    this.y += this.speedY;
+    if(this.updates++ > this.reverse){
+      this.direction *= -1;
+      this.updates = 0;
+    }
+    this.x += (this.direction * this.speedX);
+    this.y += (this.direction * this.speedY);
 
-    if(this.speedX >= 0.1 || this.speedX <= -0.1){
-      this.speedX += this.accelX;
-    }
-    else{
-      // this.color = 'rgba(90,90,140, ' + this.opacity + ')';
-      this.speedX = 0;
-    }
-
-    if(this.speedY >= 0.1 || this.speedY <= -0.1){
-      this.speedY += this.accelY;
-    }
-    else{
-      // this.color = 'rgba(221,220, 187, ' + this.opacity + ')';;
-      this.speedY = 0;
-    }
-
-    if(this.speedX == 0.0 && this.speedY == 0.0){
-      this.color = 'rgba(255,0,120, ' + this.opacity + ')';;
-    }
   }
   draw(){
     ctx.fillStyle = this.color;
@@ -82,22 +66,16 @@ class Particle{
 }
 
 function init(){
-  for (let i = 0; i < 5500; i++){
+  // particlesArray = [];
+  for (let i = 0; i < 100; i++){
     particlesArray.push(new Particle());
   }
 }
-init();
-console.log(particlesArray);
 
 function handleParticles(){
   for(let i = 0; i < particlesArray.length; i++){
       particlesArray[i].update();
       particlesArray[i].draw();
-      if(particlesArray[i].garbage == true || particlesArray[i].x < 0 || 
-         particlesArray[i].x > canvas.width || particlesArray[i].y < 0 ||
-         particlesArray[i].y > canvas.height){
-        particlesArray.splice(i, 1);
-      }
   }
 }
 
@@ -106,5 +84,4 @@ function animate(){
   handleParticles();
   requestAnimationFrame(animate);
 }
-
 animate();
